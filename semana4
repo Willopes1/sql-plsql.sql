@@ -1,0 +1,98 @@
+
+-- 1. Criar procedure Insere_projeto
+
+CREATE OR REPLACE brh.insere_projetos (
+    p_nome_projeto IN brh.projeto.nome%TYPE,
+    p_responsavel_projeto IN brh.projeto.responsavel%TYPE
+)
+IS
+BEGIN
+    INSERT INTO brh.projeto(nome, responsavel, inicio)
+    VALUES (p_nome_projeto, p_responsavel, sysdate) ;
+END;
+
+BEGIN 
+    brh.insere_projeto('TM1, 'M123');
+    COMMIT;
+END
+
+-- 2. Criar função calcula_idade
+
+
+CREATE OR REPLACE brh_calcula_idade (
+  p_data_nascimento IN DATE
+)
+RETURN  NUMBER
+IS 
+  v_idade NUMBER;
+BEGIN
+  SELECT TRUNC (MONTHS_BETWEEN, p_data_nascimento) / 12)
+  INTO V_idade
+  FROM DUAL;
+
+  RETURN v_idade;
+END
+
+SELECT brh.calcula_idade (DATE '1989911-09') AS idade FROM dual;
+
+
+-- Criar funcao finaliza_projeto
+
+CREATE OR REPLACE FUNCTION brh.finaliza_projeto(
+  p_id_projeto IN brh.projeto.ID%TYPE
+
+)
+
+RETURN DATE 
+IS
+  v_data_finalizacao DATE;
+BEGIN
+  v_data_finalizacao := SYSDATE;
+
+  UPDATE brh.projeto
+  SET FIM = v_data_finalizacao
+  WHERE ID = p_id_projeto;
+
+  RETURN v_data_finalizacao;
+END
+
+DECLARE 
+  v_data_finalizacao DATE;
+BEGIN 
+  v_data_finalizacao := brh.finaliza_projeto(67);
+  DBMS_OUTPUT_LINE('Data Finalização: ' || v_data_finalizacao);
+END;
+
+
+-- Validar novo projeto
+
+CREATE OR REPLACE PROCEDURE brh.insere_projeto(
+  p_nome_projeto IN brh.projeto.nome%TYPE,
+  p_nome_responsavel_projeto IN brh.projeto.responsavel%TYPE
+
+)
+IS 
+BEGIN
+  IF p_nome_projeto IS NULL OR LENGTH(p_nome_projeto) < 2 THEN
+      RAISE_APPLICATION_ERROR(-20001, 'Nome do projeto inválido! Deve ter dois ou mais caracteres.');
+  END IF;
+
+  INSERT INTO brh.projeto(nome, responsavel, inicio)
+  VALUES (p_nome_projeto, p_responsavel_projeto, sysdate);
+END;
+
+BEGIN 
+  brh.insere_projeto('T', 'M123');
+  COMMIT;
+END;
+
+
+
+
+
+
+
+  
+
+
+
